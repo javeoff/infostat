@@ -1,0 +1,17 @@
+{
+  "name": "nitro-boost",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "jave",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.3",
+    "discord.js": "^12.4.1",
+    "node-fetch": "^2.6.1",
+    "weather-js": "^2.0.0"
+  }
+}
