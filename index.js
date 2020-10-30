@@ -390,4 +390,4 @@ client.on('ready', () => {
     loadData(1000*60*60)
 })
 
-client.login('NzcxMDE1OTgwNjc0ODQyNjI1.X5l-lg.Nqa5KxpdMUO1j-vLktaUpQSkctI');
+client.login(process.env.BOT_TOKEN);
