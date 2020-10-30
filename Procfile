@@ -1,1 +1,1 @@
-worker: node simple
+worker: node index
