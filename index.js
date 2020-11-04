@@ -45,13 +45,13 @@ class ChannelTitle {
         switch (type) {
             case "sick":
                 return `🦠${smile} Заболели: ${count}`
-            break;
+                break;
             case "health":
                 return `💊${smile} Вылеченных: ${count}`
-            break;
+                break;
             case "deaths":
                 return `💀${smile} Умерших: ${count}`
-            break;
+                break;
         }
         return 'corona'
     }
@@ -83,31 +83,31 @@ class Information {
     }
 
     fetchCorona(country) {
-        return new Promise(async (resolve, reject) => {
+        return new Promise(async(resolve, reject) => {
             const Link = "https://en.wikipedia.org/wiki/Template:2019%E2%80%9320_coronavirus_pandemic_data"
             let response = await fetch(Link)
             response = await response.text();
             let $ = cheerio.load(response);
-            let virus = $('#thetable tr th a:contains("'+country+'")').parents('tr').find($('td')).text().split("\n");
-            
+            let virus = $('#thetable tr th a:contains("' + country + '")').parents('tr').find($('td')).text().split("\n");
+
             if (!virus) reject(new Error('Информация о данной стране отсутствует. Убедитесь, что название страны указано на английском'))
-    
+
             console.log('fetch corona');
 
             CORONA[country] = {}
             CORONA[country].deaths = virus[1]
             CORONA[country].health = virus[2]
             CORONA[country].sick = virus[0]
-    
+
             resolve(CORONA[country])
         })
     }
 
     fetchWeather(city) {
         return new Promise((resolve, reject) => {
-            weather.find({search: city, degreeType: 'C'}, function(err, result) {
-                if(err) reject(err)
-    
+            weather.find({ search: city, degreeType: 'C' }, function(err, result) {
+                if (err) reject(err)
+
                 WEATHER[city] = result[0]
                 resolve(result[0])
             });
@@ -151,20 +151,20 @@ class File {
     }
 
     saveFile() {
-        fs.writeFileSync('servers.json', JSON.stringify({channels:channels}))
+        fs.writeFileSync('servers.json', JSON.stringify({ channels: channels }))
     }
 }
 
 function createEmbed(title, desc, footer, img, author, asrc) {
     const Embed = new Discord.MessageEmbed({
-    title: title,
-    description: desc,
-    footer: footer,
+        title: title,
+        description: desc,
+        footer: footer,
     })
 
     Embed.setColor("DARK_BUT_NOT_BLACK")
     Embed.setImage(img)
-    Embed.setAuthor(author,asrc)
+    Embed.setAuthor(author, asrc)
     Embed.setFooter(footer)
 
     return Embed
@@ -173,17 +173,15 @@ function createEmbed(title, desc, footer, img, author, asrc) {
 function createVChannel(guild, text) {
     return guild.channels.create(text, {
         type: 'voice',
-        permissionOverwrites: [
-          {
+        permissionOverwrites: [{
             id: guild.roles.everyone.id, // @everyone role
             deny: ['CONNECT']
-          }
-        ]
+        }]
     });
 }
 
 function editVChannel(channel, name) {
-    return channel.edit({name})
+    return channel.edit({ name })
 }
 
 async function loadData(timeout) {
@@ -202,14 +200,14 @@ async function loadData(timeout) {
             const guild = channel.guild
             const info = new Information(guild)
             var ch_title = new ChannelTitle(guild)
-    
+
             switch (channelData["type"]) {
                 case "members":
                     await editVChannel(channel, ch_title.memberTitle(info.memberCount))
-                break;
+                    break;
                 case "online":
                     await editVChannel(channel, ch_title.onlineTitle(info.online))
-                break;
+                    break;
                 case "deaths":
                 case "health":
                 case "sick":
@@ -218,12 +216,12 @@ async function loadData(timeout) {
 
                     //var coronaData = info.coronaInfo(country)
                     var coronaData = coronaData = await info.fetchCorona(country)
-                    //if (!coronaData) coronaData = await info.fetchCorona(country)
+                        //if (!coronaData) coronaData = await info.fetchCorona(country)
 
                     var ch_title = new ChannelTitle(guild)
                     console.log(ch_title.coronaTitle(type, coronaData[type], ch_title.getCountrySmile(country)));
                     await editVChannel(channel, ch_title.coronaTitle(type, coronaData[type], ch_title.getCountrySmile(country)))
-                break;
+                    break;
                 case "weather":
                     var city = channelData["geo"]
 
@@ -236,11 +234,10 @@ async function loadData(timeout) {
 
                     var ch_title = new ChannelTitle(guild)
                     await editVChannel(channel, ch_title.weatherTitle(degree, city, ch_title.getWeatherSmile(tw)))
-                break;
+                    break;
             }
         }
-    }
-    else console.log("Данные для инициализации отсутствуют.");
+    } else console.log("Данные для инициализации отсутствуют.");
 
     setTimeout(() => loadData(timeout), timeout)
 }
@@ -275,11 +272,11 @@ client.on('message', async msg => {
             let online = guild.members.cache.filter(m => m.presence.status !== 'offline').size
             desc = "Online"
 
-            if (!msg.member.permissions.has('ADMINISTRATOR')) 
-            return msg.reply('У вас нет прав на использование этой команды')
+            if (!msg.member.permissions.has('ADMINISTRATOR'))
+                return msg.reply('У вас нет прав на использование этой команды')
 
-            if (channels.find(cd => {if (String(cd.guild_id) === String(msg.guild.id) && cd.type === cmd.start) return true}))
-            return msg.reply('В этом сервере уже есть динамический канал с обновляющимся онлайном')
+            if (channels.find(cd => { if (String(cd.guild_id) === String(msg.guild.id) && cd.type === cmd.start) return true }))
+                return msg.reply('В этом сервере уже есть динамический канал с обновляющимся онлайном')
 
             var file = new File()
             var channel = await createVChannel(guild, ch_title.onlineTitle(online))
@@ -290,18 +287,18 @@ client.on('message', async msg => {
             })
 
             msg.reply(createEmbed(title, desc, footer, img, author, asrc))
-        break;
+            break;
         case "members":
             var guild = msg.guild
             var ch_title = new ChannelTitle(guild)
             let memberCount = guild.memberCount
             desc = "members"
 
-            if (!msg.member.permissions.has('ADMINISTRATOR')) 
-            return msg.reply('У вас нет прав на использование этой команды')
+            if (!msg.member.permissions.has('ADMINISTRATOR'))
+                return msg.reply('У вас нет прав на использование этой команды')
 
-            if (channels.find(cd => {if (String(cd.guild_id) === String(msg.guild.id) && cd.type === cmd.start) return true}))
-            return msg.reply('В этом сервере уже есть динамический канал с обновляющимся количеством участников')
+            if (channels.find(cd => { if (String(cd.guild_id) === String(msg.guild.id) && cd.type === cmd.start) return true }))
+                return msg.reply('В этом сервере уже есть динамический канал с обновляющимся количеством участников')
 
             var file = new File()
             var channel = await createVChannel(guild, ch_title.memberTitle(memberCount))
@@ -312,7 +309,7 @@ client.on('message', async msg => {
             })
 
             msg.reply(createEmbed(title, desc, footer, img, author, asrc))
-        break;
+            break;
         case "corona":
             var guild = msg.guild
             var ch_title = new ChannelTitle(guild)
@@ -321,17 +318,17 @@ client.on('message', async msg => {
             let country = cmd.args[0]
             if (!country) country = 'Russia'
 
-            if (!msg.member.permissions.has('ADMINISTRATOR')) 
-            return msg.reply('У вас нет прав на использование этой команды')
+            if (!msg.member.permissions.has('ADMINISTRATOR'))
+                return msg.reply('У вас нет прав на использование этой команды')
 
-            if (channels.find(cd => {if (String(cd.guild_id) === String(msg.guild.id) && cd.type === cmd.start) return true}))
-            return msg.reply('В этом сервере уже есть динамический канал с обновляющейся информацией о заболевших')
+            if (channels.find(cd => { if (String(cd.guild_id) === String(msg.guild.id) && cd.type === cmd.start) return true }))
+                return msg.reply('В этом сервере уже есть динамический канал с обновляющейся информацией о заболевших')
 
             var info = new Information()
             var coronaData = info.coronaInfo(country)
             if (!coronaData) coronaData = await info.fetchCorona(country)
 
-            const types = ["deaths","health","sick"]
+            const types = ["deaths", "health", "sick"]
             var file = new File()
             types.forEach(async type => {
                 var title = ch_title.coronaTitle(type, coronaData[type], ch_title.getCountrySmile(country))
@@ -343,11 +340,11 @@ client.on('message', async msg => {
                     type: type,
                     geo: country
                 })
-    
+
             })
 
             msg.reply(createEmbed(title, desc, footer, img, author, asrc))
-        break;
+            break;
         case "weather":
             var guild = msg.guild
             var ch_title = new ChannelTitle(guild)
@@ -356,11 +353,11 @@ client.on('message', async msg => {
             let city = cmd.args[0]
             if (!city) city = 'Moscow'
 
-            if (!msg.member.permissions.has('ADMINISTRATOR')) 
-            return msg.reply('У вас нет прав на использование этой команды')
+            if (!msg.member.permissions.has('ADMINISTRATOR'))
+                return msg.reply('У вас нет прав на использование этой команды')
 
-            if (channels.find(cd => {if (String(cd.guild_id) === String(msg.guild.id) && cd.type === cmd.start) return true}))
-            return msg.reply('В этом сервере уже есть динамический канал с обновляющейся погодой')
+            if (channels.find(cd => { if (String(cd.guild_id) === String(msg.guild.id) && cd.type === cmd.start) return true }))
+                return msg.reply('В этом сервере уже есть динамический канал с обновляющейся погодой')
 
             var info = new Information()
             var weatherData = info.weatherInfo(city)
@@ -380,14 +377,14 @@ client.on('message', async msg => {
             })
 
             msg.reply(createEmbed(title, desc, footer, img, author, asrc))
-        break;
+            break;
     }
 })
 
 client.on('ready', () => {
     console.log('Бот включен');
 
-    loadData(1000*60*60)
+    loadData(1000 * 30)
 })
 
 client.login(process.env.BOT_TOKEN);
